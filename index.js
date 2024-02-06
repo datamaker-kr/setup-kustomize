@@ -37,7 +37,7 @@ async function run() {
     }
 
     // Set output
-    core.setOutput('kustomize_yaml_path', outputPath);
+    core.setOutput('output_kustomize_yaml_path', outputPath);
   } catch (error) {
     core.setFailed(error.message);
   }
