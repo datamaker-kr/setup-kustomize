@@ -3,9 +3,10 @@ const exec = require('@actions/exec');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
+const exec_process = require('child_process');
 
-async function checkKubectlInstalled() {
-  await exec.exec('kubectl version --client', (error, stdout, stderr) => {
+function checkKubectlInstalled() {
+  exec_process('kubectl version --client', (error, stdout, stderr) => {
     if (error) {
       core.debug('kubectl is not installed or not found in PATH.');
       return false;
@@ -14,6 +15,7 @@ async function checkKubectlInstalled() {
       return true;
     }
   });
+  return false;
 }
 
 async function run() {
@@ -28,7 +30,7 @@ async function run() {
     // Save the result to a temporary file
     const tempFile = path.join(os.tmpdir(), 'kustomize_output.yaml');
 
-    const kubectlInstalled = await checkKubectlInstalled();
+    const kubectlInstalled = checkKubectlInstalled();
     if (!kubectlInstalled) {
       // Download Kustomize
       core.debug(`Downloading kustomize version ${kustomizeVersion} for ${architecture}`);
@@ -37,9 +39,7 @@ async function run() {
 
       core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}\``);
       await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
-    }
-
-    else {
+    } else {
       core.debug(`Running command: \`kubectl kustomize ${kustomizationDirectory} > ${tempFile}\``);
       await exec.exec(`kubectl kustomize ${kustomizationDirectory} > ${tempFile}`);
     }
