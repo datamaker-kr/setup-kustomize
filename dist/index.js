@@ -27875,6 +27875,8 @@ async function run() {
     }
 
     // Set output
+    core.debug(`Output path: ${outputPath}`);
+    core.debug(`Output content: ${fs.readFileSync(outputPath)}`);
     core.setOutput('result', outputPath);
   } catch (error) {
     core.setFailed(error.message);
