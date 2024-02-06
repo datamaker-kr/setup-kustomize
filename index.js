@@ -10,7 +10,7 @@ async function run() {
     const kustomizeVersion = core.getInput('kustomize_version', {required: true});
     const architecture = core.getInput('architecture', {required: true});
     const kustomizationDirectory = core.getInput('kustomize_directory', {required: true});
-    const outputPath = core.getInput('output_kustomize_yaml_path', {required: true})
+    const outputPath = core.getInput('output_path', {required: true})
     const kustomizePath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize');
 
     // Download Kustomize
@@ -37,7 +37,7 @@ async function run() {
     }
 
     // Set output
-    core.setOutput('output_kustomize_yaml_path', outputPath);
+    core.setOutput('result', outputPath);
   } catch (error) {
     core.setFailed(error.message);
   }

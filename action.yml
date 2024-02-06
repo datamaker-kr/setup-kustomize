@@ -12,13 +12,13 @@ inputs:
   kustomize_directory:
     description: 'Directory containing kustomization files'
     required: true
-  output_kustomize_yaml_path:
+  output_path:
     description: 'Path to the kustomize yaml file'
     required: false
     default: './kustomized.yaml'
 
 outputs:
-  output_kustomize_yaml_path:
+  result:
     description: 'Path to the kustomize yaml file'
 
 runs:
