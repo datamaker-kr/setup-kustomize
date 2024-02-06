@@ -4,6 +4,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
+
 async function run() {
   try {
     const kustomizeVersion = core.getInput('kustomize_version', {required: true});
@@ -20,7 +21,13 @@ async function run() {
     // Save the result to a temporary file
     const tempFile = path.join(os.tmpdir(), 'kustomize_output.yaml');
     await exec.exec(`${kustomizePath} ${kustomizationDirectory} > ${tempFile}`);
-    await exec.exec(`cat ${tempFile} | envsubst > ${outputPath}`);
+    await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
+
+    try {
+      fs.writeFileSync(outputPath, fs.readFileSync(tempFile));
+    } catch (error) {
+      core.setFailed(`Failed to write to ${outputPath}: ${error}`);
+    }
 
     // Clean up the temporary file
     try {
