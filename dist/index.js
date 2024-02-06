@@ -28031,16 +28031,18 @@ async function run() {
 
     const kubectlInstalled = await commandExists('kubectl');
     if (!kubectlInstalled) {
-      // Download Kustomize
-      core.debug(`Downloading kustomize version ${kustomizeVersion} for ${architecture}`);
-      await exec.exec(`curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/${kustomizeVersion}/kustomize_${kustomizeVersion}_${architecture}.tar.gz`);
-      await exec.exec(`tar xzf ./kustomize_${kustomizeVersion}_${architecture}.tar.gz -C ${process.env.GITHUB_WORKSPACE}`);
+      if (!fs.existsSync(kustomizePath)) {
+        // Download Kustomize
+        core.debug(`Downloading kustomize version ${kustomizeVersion} for ${architecture}`);
+        await exec.exec(`curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/${kustomizeVersion}/kustomize_${kustomizeVersion}_${architecture}.tar.gz`);
+        await exec.exec(`tar xzf ./kustomize_${kustomizeVersion}_${architecture}.tar.gz -C ${process.env.GITHUB_WORKSPACE}`);
+      }
 
-      core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}\``);
-      await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
+      core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} -o ${tempFile}\``);
+      await exec.exec(`${kustomizePath} build ${kustomizationDirectory} -o ${tempFile}`);
     } else {
-      core.debug(`Running command: \`kubectl kustomize ${kustomizationDirectory} > ${tempFile}\``);
-      await exec.exec(`kubectl kustomize ${kustomizationDirectory} > ${tempFile}`);
+      core.debug(`Running command: \`kubectl kustomize ${kustomizationDirectory} -o ${tempFile}\``);
+      await exec.exec(`kubectl kustomize ${kustomizationDirectory} -o ${tempFile}`);
     }
 
     await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
