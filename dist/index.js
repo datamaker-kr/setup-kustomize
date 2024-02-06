@@ -27852,24 +27852,26 @@ async function run() {
     const kustomizePath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize');
 
     // Download Kustomize
+    core.debug(`Downloading kustomize version ${kustomizeVersion} for ${architecture}`);
     await exec.exec(`curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/${kustomizeVersion}/kustomize_${kustomizeVersion}_${architecture}.tar.gz`);
     await exec.exec(`tar xzf ./kustomize_${kustomizeVersion}_${architecture}.tar.gz -C ${process.env.GITHUB_WORKSPACE}`);
 
     // Build Kustomize Configuration and process it with envsubst
     // Save the result to a temporary file
     const tempFile = path.join(os.tmpdir(), 'kustomize_output.yaml');
+
+    core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}\``);
     await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
     await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
 
+    core.debug(`Output content: ${fs.readFileSync(tempFile)}`);
     try {
       fs.writeFileSync(outputPath, fs.readFileSync(tempFile));
     } catch (error) {
       core.setFailed(`Failed to write to ${outputPath}: ${error}`);
     }
 
-    // Set output
-    core.debug(`Output path: ${outputPath}`);
-    core.debug(`Output content: ${fs.readFileSync(outputPath)}`);
+    core.debug(`Setting output 'result' to ${outputPath}`)
     core.setOutput('result', outputPath);
 
     // Clean up the temporary file
