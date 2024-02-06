@@ -4,6 +4,17 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
+async function checkKubectlInstalled() {
+  await exec.exec('kubectl version --client', (error, stdout, stderr) => {
+    if (error) {
+      core.debug('kubectl is not installed or not found in PATH.');
+      return false;
+    } else {
+      core.debug('kubectl is installed.');
+      return true;
+    }
+  });
+}
 
 async function run() {
   try {
@@ -13,19 +24,27 @@ async function run() {
     const outputPath = core.getInput('output_path', {required: true})
     const kustomizePath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize');
 
-    // Download Kustomize
-    core.debug(`Downloading kustomize version ${kustomizeVersion} for ${architecture}`);
-    await exec.exec(`curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/${kustomizeVersion}/kustomize_${kustomizeVersion}_${architecture}.tar.gz`);
-    await exec.exec(`tar xzf ./kustomize_${kustomizeVersion}_${architecture}.tar.gz -C ${process.env.GITHUB_WORKSPACE}`);
-
     // Build Kustomize Configuration and process it with envsubst
     // Save the result to a temporary file
     const tempFile = path.join(os.tmpdir(), 'kustomize_output.yaml');
 
-    core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}\``);
-    await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
-    await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
+    const kubectlInstalled = await checkKubectlInstalled();
+    if (!kubectlInstalled) {
+      // Download Kustomize
+      core.debug(`Downloading kustomize version ${kustomizeVersion} for ${architecture}`);
+      await exec.exec(`curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/${kustomizeVersion}/kustomize_${kustomizeVersion}_${architecture}.tar.gz`);
+      await exec.exec(`tar xzf ./kustomize_${kustomizeVersion}_${architecture}.tar.gz -C ${process.env.GITHUB_WORKSPACE}`);
 
+      core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}\``);
+      await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
+    }
+
+    else {
+      core.debug(`Running command: \`kubectl kustomize ${kustomizationDirectory} > ${tempFile}\``);
+      await exec.exec(`kubectl kustomize ${kustomizationDirectory} > ${tempFile}`);
+    }
+
+    await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
     core.debug(`Output content: ${fs.readFileSync(tempFile)}`);
     try {
       fs.writeFileSync(outputPath, fs.readFileSync(tempFile));
