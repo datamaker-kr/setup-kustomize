@@ -27,11 +27,11 @@ async function run() {
         await exec.exec(`tar xzf ./kustomize_${kustomizeVersion}_${architecture}.tar.gz -C ${process.env.GITHUB_WORKSPACE}`);
       }
 
-      core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}\``);
-      await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
+      core.debug(`Running command: \`${kustomizePath} build ${kustomizationDirectory} -o ${tempFile}\``);
+      await exec.exec(`${kustomizePath} build ${kustomizationDirectory} -o ${tempFile}`);
     } else {
-      core.debug(`Running command: \`kubectl kustomize ${kustomizationDirectory} > ${tempFile}\``);
-      await exec.exec(`kubectl kustomize ${kustomizationDirectory} > ${tempFile}`);
+      core.debug(`Running command: \`kubectl kustomize ${kustomizationDirectory} -o ${tempFile}\``);
+      await exec.exec(`kubectl kustomize ${kustomizationDirectory} -o ${tempFile}`);
     }
 
     await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
