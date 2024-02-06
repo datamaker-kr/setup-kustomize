@@ -29,18 +29,20 @@ async function run() {
       core.setFailed(`Failed to write to ${outputPath}: ${error}`);
     }
 
+    // Set output
+    core.debug(`Output path: ${outputPath}`);
+    core.debug(`Output content: ${fs.readFileSync(outputPath)}`);
+    core.setOutput('result', outputPath);
+
     // Clean up the temporary file
     try {
       fs.unlinkSync(tempFile);
     } catch (error) {
       core.warning(`Failed to delete temporary file ${tempFile}: ${error}`);
     }
-
-    // Set output
-    core.debug(`Output path: ${outputPath}`);
-    core.debug(`Output content: ${fs.readFileSync(outputPath)}`);
-    core.setOutput('result', outputPath);
   } catch (error) {
     core.setFailed(error.message);
   }
 }
+
+run();
