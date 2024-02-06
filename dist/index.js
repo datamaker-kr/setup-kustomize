@@ -28045,7 +28045,7 @@ async function run() {
       await exec.exec(`kubectl kustomize ${kustomizationDirectory} -o ${tempFile}`);
     }
 
-    await exec.exec(`cat ${tempFile} | envsubst > ${outputPath}`, function (error, stdout, stderr) {
+    await exec.exec(`bash -c "cat ${tempFile} | envsubst > ${outputPath}"`, function (error, stdout, stderr) {
       if (error) {
         core.setFailed(`Failed to process kustomize output with envsubst: ${error}`);
       }
