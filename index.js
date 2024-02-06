@@ -20,7 +20,7 @@ async function run() {
     // Build Kustomize Configuration and process it with envsubst
     // Save the result to a temporary file
     const tempFile = path.join(os.tmpdir(), 'kustomize_output.yaml');
-    await exec.exec(`${kustomizePath} ${kustomizationDirectory} > ${tempFile}`);
+    await exec.exec(`${kustomizePath} build ${kustomizationDirectory} > ${tempFile}`);
     await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
 
     try {
