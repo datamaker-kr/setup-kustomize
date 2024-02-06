@@ -28045,13 +28045,20 @@ async function run() {
       await exec.exec(`kubectl kustomize ${kustomizationDirectory} -o ${tempFile}`);
     }
 
-    await exec.exec(`cat ${tempFile} | envsubst > ${tempFile}`);
-    core.debug(`Output content: ${fs.readFileSync(tempFile)}`);
-    try {
-      fs.writeFileSync(outputPath, fs.readFileSync(tempFile));
-    } catch (error) {
-      core.setFailed(`Failed to write to ${outputPath}: ${error}`);
-    }
+    await exec.exec(`cat ${tempFile} | envsubst > ${outputPath}`, function (error, stdout, stderr) {
+      if (error) {
+        core.setFailed(`Failed to process kustomize output with envsubst: ${error}`);
+      }
+
+      try {
+        fs.writeFile(outputPath, stdout);
+      } catch (error) {
+        core.setFailed(`Failed to write to ${outputPath}: ${error}`);
+      }
+
+      fs.unlink(tempFile);
+    })
+
 
     core.debug(`Setting output 'result' to ${outputPath}`)
     core.setOutput('result', outputPath);
