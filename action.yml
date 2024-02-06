@@ -15,7 +15,7 @@ inputs:
   output_kustomize_yaml_path:
     description: 'Path to the kustomize yaml file'
     required: false
-    default: '/tmp/kustomize.yaml'
+    default: './kustomized.yaml'
 
 outputs:
   output_kustomize_yaml_path:
