@@ -1,0 +1,26 @@
+name: 'Setup Kustomize'
+description: 'Downloads and sets up Kustomize'
+inputs:
+  kustomize_version:
+    description: 'Kustomize version to install'
+    required: true
+    default: 'v5.3.0'
+  architecture:
+    description: 'Architecture to use'
+    required: true
+    default: 'linux_amd64'
+  kustomize_directory:
+    description: 'Directory containing kustomization files'
+    required: true
+  output_kustomize_yaml_path:
+    description: 'Path to the kustomize yaml file'
+    required: false
+    default: '/tmp/kustomize.yaml'
+
+outputs:
+  output_kustomize_yaml_path:
+    description: 'Path to the kustomize yaml file'
+
+runs:
+  using: 'node20'
+  main: index.js
