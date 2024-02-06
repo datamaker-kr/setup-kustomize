@@ -27847,7 +27847,7 @@ async function run() {
   try {
     const kustomizeVersion = core.getInput('kustomize_version', {required: true});
     const architecture = core.getInput('architecture', {required: true});
-    const kustomizationDirectory = core.getInput('kustomize_directory', {required: true});
+    const kustomizationDirectory = path.join(process.env.GITHUB_WORKSPACE, core.getInput('kustomize_directory', {required: true}));
     const outputPath = core.getInput('output_path', {required: true})
     const kustomizePath = path.join(process.env.GITHUB_WORKSPACE, 'kustomize');
 
