@@ -28028,7 +28028,7 @@ async function run() {
   // Save the result to a temporary file
   const tempFile = path.join(os.tmpdir(), 'kustomize_output.yaml');
 
-  const kubectlInstalled = await commandExists('kubectl');
+  const kubectlInstalled = commandExists('kubectl').then(() => true).catch(() => false);
   if (!kubectlInstalled) {
     if (!fs.existsSync(kustomizePath)) {
       // Download Kustomize
